@@ -7,7 +7,7 @@ from .Paper import Paper
 from .PapersFilters import filterJurnals, filter_min_date, similarStrings
 from .Downloader import downloadPapers
 from .Scholar import ScholarPapersInfo
-from .Crossref import getPapersInfoFromDOIs
+from .Crossref import getPapersInfoFromDOIs, getPapersInfoFromMixed
 from .proxy import proxy
 
 def start(query, scholar_results, scholar_pages, dwn_dir, proxy, min_date=None, num_limit=None, num_limit_type=None, filter_jurnal_file=None, restrict=None, DOIs=None, SciHub_URL=None):
@@ -22,9 +22,14 @@ def start(query, scholar_results, scholar_pages, dwn_dir, proxy, min_date=None, 
         i = 0
         while i < len(DOIs):
             DOI = DOIs[i]
-            print("Searching paper {} of {} with DOI {}".format(num, len(DOIs), DOI))
-            papersInfo = getPapersInfoFromDOIs(DOI, restrict)
-            to_download.append(papersInfo)
+            if len(DOI) == 2:
+                print("Searching paper {} of {} with DOI {}".format(num, len(DOIs), DOI[1]))
+                papersInfo = getPapersInfoFromMixed(DOI, restrict)
+                to_download.append(papersInfo)
+            else:
+                print("Searching paper {} of {} with DOI {}".format(num, len(DOIs), DOI))
+                papersInfo = getPapersInfoFromDOIs(DOI, restrict)
+                to_download.append(papersInfo)
 
             num += 1
             i += 1
@@ -82,6 +87,8 @@ def main():
                         help='Use proxychains, provide a seperated list of proxies to use.Please specify the argument al the end')
     parser.add_argument('--single-proxy', type=str, default=None,
                         help='Use a single proxy. Recommended if using --proxy gives errors')
+    parser.add_argument('--mix-file', type=str, default=None,
+                        help='File .csv containing the list of paper names and each paper\'s DOIs to download')
     args = parser.parse_args()
 
     if args.single_proxy is not None:
@@ -95,7 +102,7 @@ def main():
         pchain = args.proxy
         proxy(pchain)
 
-    if args.query is None and args.doi_file is None and args.doi is None:
+    if args.query is None and args.doi_file is None and args.doi is None and args.mix_file is None:
         print("Error, provide at least one of the following arguments: --query or --file")
         sys.exit()
 
@@ -150,6 +157,18 @@ def main():
                     DOIs.append(line[:-1])
                 else:
                     DOIs.append(line)
+    
+    if args.mix_file is not None:
+        DOIs = []
+        f = args.mix_file.replace('\\', '/')
+        with open(f) as file_in:
+            for line in file_in:
+                if line[-1] == '\n':
+                    print(line[:-1].split(','))
+                    DOIs.append(line[:-1].split(','))
+                else:
+                    print(line.split(','))
+                    DOIs.append(line.split(','))
 
     if args.doi is not None:
         DOIs = [args.doi]

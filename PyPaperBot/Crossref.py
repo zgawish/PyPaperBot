@@ -39,6 +39,24 @@ def getPapersInfoFromDOIs(DOI, restrict):
 
     return paper_found
 
+def getPapersInfoFromMixed(DOI, restrict):
+    paper_found = Paper()
+    paper_found.DOI = DOI[1]
+
+    try:
+        paper = get_entity(DOI[1], EntityType.PUBLICATION, OutputType.JSON)
+        if paper is not None and len(paper) > 0:
+            paper_found.title = DOI[0]
+            if "short-container-title" in paper and len(paper["short-container-title"]) > 0:
+                paper_found.jurnal = paper["short-container-title"][0]
+
+            if restrict is None or restrict != 1:
+                paper_found.setBibtex(getBibtex(paper_found.DOI))
+    except:
+        print("Paper not found {}: {}".format(DOI[0], DOI[1]))
+
+    return paper_found
+
 
 # Get paper information from Crossref and return a list of Paper
 def getPapersInfo(papers, scholar_search_link, restrict, scholar_results):

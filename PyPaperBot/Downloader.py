@@ -42,7 +42,7 @@ def saveFile(file_name, content, paper, dwn_source):
     f = open(file_name, 'wb')
     f.write(content)
     f.close()
-
+    print("downloaded")
     paper.downloaded = True
     paper.downloadedFrom = dwn_source
 
@@ -60,7 +60,7 @@ def downloadPapers(papers, dwnl_dir, num_limit, SciHub_URL=None):
     paper_files = []
     for p in papers:
         if p.canBeDownloaded() and (num_limit is None or num_downloaded < num_limit):
-            print("Download {} of {} -> {}".format(paper_number, len(papers), p.title))
+            print("Attempting to download {} of {} -> {}".format(paper_number, len(papers), p.title))
             paper_number += 1
 
             pdf_dir = getSaveDir(dwnl_dir, p.getFileName())
@@ -69,6 +69,7 @@ def downloadPapers(papers, dwnl_dir, num_limit, SciHub_URL=None):
             url = ""
             while not p.downloaded and faild != 4:
                 try:
+                    print("ATTEMPT", faild)
                     dwn_source = 1  # 1 scihub 2 scholar
                     if faild == 0 and p.DOI is not None:
                         url = URLjoin(NetInfo.SciHub_URL, p.DOI)
@@ -82,20 +83,26 @@ def downloadPapers(papers, dwnl_dir, num_limit, SciHub_URL=None):
                         dwn_source = 2
 
                     if url != "":
-                        r = requests.get(url, headers=NetInfo.HEADERS)
+                        print("url:", url)
+                        r = requests.get(url)
+                        # r = requests.get(url, headers=NetInfo.HEADERS)
                         content_type = r.headers.get('content-type')
-
                         if dwn_source == 1 and 'application/pdf' not in content_type:
+                            print('try again')
                             time.sleep(random.randint(1, 5))
-
                             pdf_link = getSchiHubPDF(r.text)
+                            print("PDF LINK", pdf_link)
                             if pdf_link is not None:
                                 r = requests.get(pdf_link, headers=NetInfo.HEADERS)
                                 content_type = r.headers.get('content-type')
 
                         if 'application/pdf' in content_type:
                             paper_files.append(saveFile(pdf_dir, r.content, p, dwn_source))
-                except Exception:
+                            num_downloaded += 1
+                            print("Downloaded {} of {} -> {}".format(num_downloaded, len(papers), p.title))
+                            
+                except Exception as e:
+                    print("ERROR", e)
                     pass
 
                 faild += 1

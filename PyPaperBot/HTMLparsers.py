@@ -5,6 +5,7 @@ Created on Sun Jun  7 11:59:42 2020
 @author: Vito
 """
 from bs4 import BeautifulSoup
+from .NetInfo import NetInfo
 
 
 def schoolarParser(html):
@@ -82,7 +83,10 @@ def getSchiHubPDF(html):
         result = plugin.get("src")
 
     if result is not None and result[0] != "h":
-        result = "https:" + result
+        if '.se' in result:
+            result = "https:" + result
+        else:
+            result = NetInfo.SciHub_URL + result
 
     return result
 
