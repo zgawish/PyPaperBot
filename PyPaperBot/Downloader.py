@@ -69,7 +69,7 @@ def downloadPapers(papers, dwnl_dir, num_limit, SciHub_URL=None):
             url = ""
             while not p.downloaded and faild != 4:
                 try:
-                    print("ATTEMPT", faild)
+                    # print("ATTEMPT", faild)
                     dwn_source = 1  # 1 scihub 2 scholar
                     if faild == 0 and p.DOI is not None:
                         url = URLjoin(NetInfo.SciHub_URL, p.DOI)
@@ -83,15 +83,15 @@ def downloadPapers(papers, dwnl_dir, num_limit, SciHub_URL=None):
                         dwn_source = 2
 
                     if url != "":
-                        print("url:", url)
+                        # print("url:", url)
                         r = requests.get(url)
                         # r = requests.get(url, headers=NetInfo.HEADERS)
                         content_type = r.headers.get('content-type')
                         if dwn_source == 1 and 'application/pdf' not in content_type:
-                            print('try again')
+                            # print('try again')
                             time.sleep(random.randint(1, 5))
                             pdf_link = getSchiHubPDF(r.text)
-                            print("PDF LINK", pdf_link)
+                            # print("PDF LINK", pdf_link)
                             if pdf_link is not None:
                                 r = requests.get(pdf_link, headers=NetInfo.HEADERS)
                                 content_type = r.headers.get('content-type')
