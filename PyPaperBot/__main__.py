@@ -23,25 +23,25 @@ def start(query, scholar_results, scholar_pages, dwn_dir, proxy, min_date=None, 
         queries_found_list = []
         queries_not_found_list = []
         for query_idx, q in enumerate(queries):
-            print("Query {}/{}: {}".format(query_idx, len(queries), query))
+            print("Query {}/{}: {}".format(query_idx, len(queries), q))
             queries_to_download = ScholarPapersInfo(q, scholar_pages, restrict, min_date, scholar_results)
             if len(queries_to_download) > 0:
                 queries_found += 1
                 queries_found_list.append(q)
-                print("Query found {}/{}: {}".format(queries_found, len(queries), query))
+                print("Query found {}/{}: {}".format(queries_found, len(queries), q))
             else:
                 queries_not_found += 1
                 queries_not_found_list.append(q)
-                print("Query not found {}/{}: {}".format(queries_not_found, len(queries), query))
+                print("Query not found {}/{}: {}".format(queries_not_found, len(queries), q))
             for paper in queries_to_download:
                 paper.title = query_pdf_names[query_idx]
                 to_download.append(paper)
-        print("Queries found: {}\nQueries not found:".format(queries_not_found, len(queries), query))
-        f = open(dwn_dir+"queries_found.txt", 'wb')
-        f.writelines(query_found + '\n' for query_found in queries_found)
+        print("Queries found: {}\nQueries not found:".format(queries_not_found, len(queries), q))
+        f = open(dwn_dir + '/queries_found.txt', 'w')
+        f.writelines(query_found + '\n' for query_found in queries_found_list)
         f.close()
-        f = open(dwn_dir+"queries_not_found.txt", 'wb')
-        f.writelines(query_not_found + '\n' for query_not_found in queries_not_found)
+        f = open(dwn_dir + '/queries_not_found.txt', 'w')
+        f.writelines(query_not_found + '\n' for query_not_found in queries_not_found_list)
         f.close()
     else:
         print("Downloading papers from DOIs\n")
